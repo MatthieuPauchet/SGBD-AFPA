@@ -1,0 +1,476 @@
+-- ------------------------------------------------------------
+-- papyrus
+-- Formaliser des requêtes SQL > Phase 3 
+-- script vérifié le 07/01/2019 par hbernard (MySql/phpMyAdmin)  
+-- -------------------------------------------------------------
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+
+-- Export de la structure de la base pour papyrus
+DROP DATABASE if EXISTS `papyrus2`
+CREATE DATABASE IF NOT EXISTS `papyrus2` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `papyrus2`;
+
+-- Export de la structure de la table papyrus.fournis
+CREATE TABLE IF NOT EXISTS `fournis` (
+  `numfou` int(11) NOT NULL,
+  `nomfou` varchar(25) NOT NULL,
+  `ruefou` varchar(50) NOT NULL,
+  `posfou` char(5) NOT NULL,
+  `vilfou` varchar(30) NOT NULL,
+  `confou` varchar(15) NOT NULL,
+  -- Contrainte `CHECK` : OK en MariaDB mais pas en MySql 
+  `satisf` tinyint(4) DEFAULT NULL, CHECK (`satisf` >=0 AND `satisf` <=10),
+  PRIMARY KEY (`numfou`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Export de données de la table papyrus.fournis : ~6 rows (environ)
+/*!40000 ALTER TABLE `fournis` DISABLE KEYS */;
+INSERT INTO `fournis` (`numfou`, `nomfou`, `ruefou`, `posfou`, `vilfou`, `confou`, `satisf`) VALUES
+	(120, 'GROBRIGAN', '20 rue du papier', '92200', 'papercity', 'Georges', 8),
+	(540, 'ECLIPSE', '53 rue laisse flotter les rubans', '78250', 'Bugbugville', 'Nestor', 7),
+	(8700, 'MEDICIS', '120 rue des plantes', '75014', 'Paris', 'Lison', 0),
+	(9120, 'DISCOBOL', '11 rue des sports', '85100', 'La Roche sur Yon', 'Hercule', 8),
+	(9150, 'DEPANPAP', '26 avenue des locomotives', '59987', 'Coroncountry', 'Pollux', 5),
+	(9180, 'HURRYTAPE', '68 boulevard des octets', '4044', 'Dumpville', 'Track', 0);
+/*!40000 ALTER TABLE `fournis` ENABLE KEYS */;
+
+-- Export de la structure de la table papyrus. produit
+CREATE TABLE IF NOT EXISTS `produit` (
+  `codart` char(4) NOT NULL,
+  `libart` varchar(30) NOT NULL,
+  `stkale` int(11) NOT NULL,
+  `stkphy` int(11) NOT NULL,
+  `qteann` int(11) NOT NULL,
+  `unimes` char(5) NOT NULL,
+  PRIMARY KEY (`codart`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Export de données de la table papyrus.produit : ~15 rows (environ)
+/*!40000 ALTER TABLE `produit` DISABLE KEYS */;
+INSERT INTO `produit` (`codart`, `libart`, `stkale`, `stkphy`, `qteann`, `unimes`) VALUES
+	('B001', 'Bande magnétique 1200', 20, 87, 240, 'unitÃ'),
+	('B002', 'Bande magnétique 6250', 20, 12, 410, 'unite'),
+	('D035', 'CD R slim 80 mm', 40, 42, 150, 'B010'),
+	('D050', 'CD R-W 80mm', 50, 4, 0, 'B010'),
+	('I100', 'Papier 1 ex continu', 100, 557, 3500, 'B1000'),
+	('I105', 'Papier 2 ex continu', 75, 5, 2300, 'B1000'),
+	('I108', 'Papier 3 ex continu', 200, 557, 3500, 'B500'),
+	('I110', 'Papier 4 ex continu', 10, 12, 63, 'B400'),
+	('P220', 'Pré-imprimé commande', 500, 2500, 24500, 'B500'),
+	('P230', 'Pré-imprimé facture', 500, 250, 12500, 'B500'),
+	('P240', 'Pré-imprimé bulletin paie', 500, 3000, 6250, 'B500'),
+	('P250', 'Pré-imprimé bon livraison', 500, 2500, 24500, 'B500'),
+	('P270', 'Pré-imprimé bon fabrication', 500, 2500, 24500, 'B500'),
+	('R080', 'ruban Epson 850', 10, 2, 120, 'unite'),
+	('R132', 'ruban impl 1200 lignes', 25, 200, 182, 'unite');
+/*!40000 ALTER TABLE `produit` ENABLE KEYS */;
+
+-- Export de la structure de la table papyrus. entcom
+CREATE TABLE IF NOT EXISTS `entcom` (
+  `numcom` int(11) NOT NULL AUTO_INCREMENT,
+  `obscom` varchar(50) DEFAULT NULL,
+  `datcom` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `numfou` int(11) DEFAULT NULL,
+  PRIMARY KEY (`numcom`),
+  KEY `numfou` (`numfou`),
+  CONSTRAINT `entcom_ibfk_1` FOREIGN KEY (`numfou`) REFERENCES `fournis` (`numfou`)
+) ENGINE=InnoDB AUTO_INCREMENT=70630 DEFAULT CHARSET=latin1;
+
+-- Export de données de la table papyrus.entcom : ~10 rows (environ)
+/*!40000 ALTER TABLE `entcom` DISABLE KEYS */;
+INSERT INTO `entcom` (`numcom`, `obscom`, `datcom`, `numfou`) VALUES
+	(70010, '', '2018-04-23 15:59:51', 120),
+	(70011, 'Commande urgente', '2018-04-23 15:59:51', 540),
+	(70020, '', '2018-04-23 15:59:51', 9120),
+	(70025, 'Commande urgente', '2018-04-23 15:59:51', 9150),
+	(70210, 'Commande cadencée', '2018-04-23 15:59:51', 120),
+	(70250, 'Commande cadencée', '2018-04-23 15:59:51', 8700),
+	(70300, '', '2018-04-23 15:59:51', 9120),
+	(70620, '', '2018-04-23 15:59:51', 540),
+	(70625, '', '2018-04-23 15:59:51', 120),
+	(70629, '', '2018-04-23 15:59:51', 9180);
+/*!40000 ALTER TABLE `entcom` ENABLE KEYS */;
+
+-- Export de la structure de la table papyrus. ligcom
+CREATE TABLE IF NOT EXISTS `ligcom` (
+  `numcom` int(11) NOT NULL,
+  `numlig` tinyint(4) NOT NULL,
+  `codart` char(4) NOT NULL,
+  `qtecde` int(11) NOT NULL,
+  `priuni` decimal(5,0) NOT NULL,
+  `qteliv` int(11) DEFAULT NULL,
+  `derliv` date NOT NULL,
+  PRIMARY KEY (`numcom`,`numlig`),
+  KEY `codart` (`codart`),
+  CONSTRAINT `ligcom_ibfk_1` FOREIGN KEY (`numcom`) REFERENCES `entcom` (`numcom`),
+  CONSTRAINT `ligcom_ibfk_2` FOREIGN KEY (`codart`) REFERENCES `produit` (`codart`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Export de données de la table papyrus.ligcom : ~0 rows (environ)
+/*!40000 ALTER TABLE `ligcom` DISABLE KEYS */;
+INSERT INTO `ligcom` (`numcom`, `numlig`, `codart`, `qtecde`, `priuni`, `qteliv`, `derliv`) VALUES
+	(70010, 1, 'I100', 3000, 470, 3000, '2007-03-15'),
+	(70010, 2, 'I105', 2000, 485, 2000, '2007-07-05'),
+	(70010, 3, 'I108', 1000, 680, 1000, '2007-08-20'),
+	(70010, 4, 'D035', 200, 40, 250, '2007-02-20'),
+	(70010, 5, 'P220', 6000, 3500, 6000, '2007-03-31'),
+	(70010, 6, 'P240', 6000, 2000, 2000, '2007-03-31'),
+	(70011, 1, 'I105', 1000, 600, 1000, '2007-05-16'),
+	(70011, 2, 'P220', 10000, 3500, 10000, '2007-08-31'),
+	(70020, 1, 'B001', 200, 140, 0, '2007-12-31'),
+	(70020, 2, 'B002', 200, 140, 0, '2007-12-31'),
+	(70025, 1, 'I100', 1000, 590, 1000, '2007-05-15'),
+	(70025, 2, 'I105', 500, 590, 500, '2007-03-15'),
+	(70210, 1, 'I100', 1000, 470, 1000, '2007-07-15'),
+	(70250, 1, 'P230', 15000, 4900, 12000, '2007-12-15'),
+	(70250, 2, 'P220', 10000, 3350, 10000, '2007-11-10'),
+	(70300, 1, 'I100', 50, 790, 50, '2007-10-31'),
+	(70620, 1, 'I105', 200, 600, 200, '2007-11-01'),
+	(70625, 1, 'I100', 1000, 470, 1000, '2007-10-15'),
+	(70625, 2, 'P220', 10000, 3500, 10000, '2007-10-31'),
+	(70629, 1, 'B001', 200, 140, 0, '2007-12-31'),
+	(70629, 2, 'B002', 200, 140, 0, '2007-12-31');
+/*!40000 ALTER TABLE `ligcom` ENABLE KEYS */;
+
+
+
+-- Export de la structure de la table papyrus. vente
+CREATE TABLE IF NOT EXISTS `vente` (
+  `codart` char(4) NOT NULL,
+  `numfou` int(11) NOT NULL,
+  `delliv` smallint(6) NOT NULL,
+  `qte1` int(11) NOT NULL,
+  `prix1` decimal(5,0) NOT NULL,
+  `qte2` int(11) DEFAULT NULL,
+  `prix2` decimal(5,0) DEFAULT NULL,
+  `qte3` int(11) DEFAULT NULL,
+  `prix3` decimal(5,0) DEFAULT NULL,
+  PRIMARY KEY (`codart`,`numfou`),
+  KEY `numfou` (`numfou`),
+  CONSTRAINT `vente_ibfk_1` FOREIGN KEY (`numfou`) REFERENCES `fournis` (`numfou`),
+  CONSTRAINT `vente_ibfk_2` FOREIGN KEY (`codart`) REFERENCES `produit` (`codart`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Export de données de la table papyrus.vente : ~0 rows (environ)
+/*!40000 ALTER TABLE `vente` DISABLE KEYS */;
+INSERT INTO `vente` (`codart`, `numfou`, `delliv`, `qte1`, `prix1`, `qte2`, `prix2`, `qte3`, `prix3`) VALUES
+	('B001', 8700, 15, 0, 150, 50, 145, 100, 140),
+	('B002', 8700, 15, 0, 210, 50, 200, 100, 185),
+	('D035', 120, 0, 0, 40, 0, 0, 0, 0),
+	('D035', 9120, 5, 0, 40, 100, 30, 0, 0),
+	('I100', 120, 90, 0, 700, 50, 600, 120, 500),
+	('I100', 540, 70, 0, 710, 60, 630, 100, 600),
+	('I100', 9120, 60, 0, 800, 70, 600, 90, 500),
+	('I100', 9150, 90, 0, 650, 90, 600, 200, 590),
+	('I100', 9180, 30, 0, 720, 50, 670, 100, 490),
+	('I105', 120, 90, 10, 705, 50, 630, 120, 500),
+	('I105', 540, 70, 0, 810, 60, 645, 100, 600),
+	('I105', 8700, 30, 0, 720, 50, 670, 100, 510),
+	('I105', 9120, 60, 0, 920, 70, 800, 90, 700),
+	('I105', 9150, 90, 0, 685, 90, 600, 200, 590),
+	('I108', 120, 90, 5, 795, 30, 720, 100, 680),
+	('I108', 9120, 60, 0, 920, 70, 820, 100, 780),
+	('I110', 9120, 60, 0, 950, 70, 850, 90, 790),
+	('I110', 9180, 90, 0, 900, 70, 870, 90, 835),
+	('P220', 120, 15, 0, 3700, 100, 3500, 0, 0),
+	('P220', 8700, 20, 50, 3500, 100, 3350, 0, 0),
+	('P230', 120, 30, 0, 5200, 100, 5000, 0, 0),
+	('P230', 8700, 60, 0, 5000, 50, 4900, 0, 0),
+	('P240', 120, 15, 0, 2200, 100, 2000, 0, 0),
+	('P250', 120, 30, 0, 1500, 100, 1400, 500, 1200),
+	('P250', 9120, 30, 0, 1500, 100, 1400, 500, 1200),
+	('R080', 9120, 10, 0, 120, 100, 100, 0, 0),
+	('R132', 9120, 5, 0, 275, 0, 0, 0, 0);
+/*!40000 ALTER TABLE `vente` ENABLE KEYS */;
+
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+
+-- 1 selectioner les commandes du fournisseur 09120
+
+SELECT numcom
+FROM entcom
+JOIN fournis ON fournis.numfou = entcom.numfou
+WHERE fournis.numfou = '09120';
+
+--2 afficher code fournisseurs pour lesquels des commandes ont été passés
+
+SELECT distinct entcom.numfou
+FROM entcom;
+
+--3 afficher le nombre de commandes fournisseurs passés et le nombde de fournisseurs concernés
+
+SELECT COUNT(entcom.numcom) AS 'nombre de commandes passés', COUNT(DISTINCT entcom.numfou) AS 'nombre de fournisseurs concernés'
+FROM entcom;
+
+--4 
+
+SELECT *
+FROM produit
+WHERE qteann < 1000 AND stkphy < (stkale+1); 
+
+--5
+
+SELECT nomfou, posfou
+FROM fournis
+WHERE posfou LIKE ('75%') OR posfou LIKE ('78%') OR posfou LIKE ('77%') OR posfou LIKE ('92%')
+ORDER BY posfou DESC, nomfou ASC 
+;
+
+SELECT nomfou, substring(posfou,1,2) AS 'numéro département'
+FROM fournis
+WHERE substring(posfou,1,2) in ('75','78','77','92') 
+ORDER BY posfou DESC, nomfou ASC 
+;
+
+--6 commandes passées en mars et avril
+
+SELECT entcom.numcom
+FROM entcom
+WHERE MONTH(datcom) IN (3, 4);
+
+--7 sélectionner les commandes du jours qui ont des observations
+
+SELECT entcom.numcom, datcom
+FROM entcom
+WHERE datcom = NOW() AND obscom IS NOT NULL;
+
+--8 
+
+SELECT ligcom.numcom, SUM(qtecde*priuni) AS 'prix total'
+FROM ligcom
+GROUP BY ligcom.numcom
+ORDER BY SUM(qtecde*priuni) DESC;
+
+select entcom.numcom as 'numero', qtecde*priuni as tot
+from papyrus.entcom
+join papyrus.ligcom
+on entcom.numcom=ligcom.numcom
+group by entcom.numcom
+order by tot desc;
+
+--9
+
+SELECT SUM(qtecde*priuni) AS 'prix total', ligcom.numcom
+FROM ligcom
+WHERE qtecde<1000
+GROUP BY ligcom.numcom
+HAVING SUM(qtecde*priuni)>10000
+ORDER BY SUM(qtecde*priuni) DESC;
+
+
+--10
+
+SELECT nomfou, entcom.numcom, datcom
+FROM fournis
+JOIN entcom ON fournis.numfou=entcom.numfou
+ORDER BY nomfou ASC;
+
+--11
+
+SELECT entcom.numcom, nomfou, libart, qtecde*priuni AS 'sous-total'
+FROM fournis
+JOIN entcom ON fournis.numfou=entcom.numfou
+JOIN ligcom ON entcom.numcom=ligcom.numcom
+JOIN produit ON ligcom.codart=produit.codart
+WHERE obscom LIKE '%urgent%';
+
+--12
+
+SELECT fournis.numfou, nomfou, COUNT(produit.codart)
+FROM fournis
+NATURAL JOIN vente
+natural JOIN produit 
+GROUP BY nomfou
+HAVING COUNT(produit.codart)>0;
+
+--résultat différent ci-desous ???
+
+SELECT nomfou, COUNT(produit.codart)
+FROM fournis
+NATURAL JOIN entcom 
+NATURAL JOIN ligcom 
+NATURAL JOIN produit
+GROUP BY nomfou
+HAVING COUNT(produit.codart)>0;
+
+SELECT fournis.numfou, nomfou, COUNT(vente.codart)
+FROM fournis
+JOIN vente ON fournis.numfou=vente.numfou
+GROUP BY nomfou
+HAVING COUNT(vente.codart)>0;
+
+-- 13
+
+-- méthode 1 jointures
+
+SELECT entcom.numcom, datcom
+FROM entcom
+NATURAL JOIN fournis
+WHERE numfou=(SELECT numfou FROM entcom WHERE numcom=70210);
+
+-- méthode 2 sous-requête
+
+SELECT numcom, datcom 
+FROM entcom 
+WHERE numfou=(SELECT numfou FROM entcom WHERE numcom=70210);
+
+-- 14 
+
+SELECT codart FROM produit WHERE stkphy>stkale; -- articles suscepetible d'être vendus (stkphy>stkale)
+
+SELECT MIN(prix1) FROM vente join produit on produit.codart=vente.codart WHERE libart LIKE 'r%'; -- calcul du prix mini d'un ruban
+
+SELECT libart, prix1
+FROM produit
+NATURAL JOIN vente
+WHERE (prix1<(SELECT MIN(prix1) FROM vente join produit on produit.codart=vente.codart WHERE libart LIKE 'r%')) AND stkphy>stkale;
+
+-- 15
+
+SELECT libart, nomfou
+FROM fournis
+NATURAL JOIN vente
+NATURAL JOIN produit
+WHERE stkphy BETWEEN stkale AND stkale*1.5
+ORDER BY libart, nomfou;
+
+-- 16
+
+SELECT libart, nomfou
+FROM fournis
+NATURAL JOIN vente
+NATURAL JOIN produit
+WHERE (stkphy BETWEEN stkale AND stkale*1.5) AND delliv<30
+ORDER BY nomfou, libart;
+
+-- 17
+
+SELECT SUM(qte1+qte2+qte3), numfou
+FROM fournis
+NATURAL JOIN vente
+NATURAL JOIN produit
+WHERE (stkphy BETWEEN stkale AND stkale*1.5) AND delliv<30
+GROUP BY numfou
+ORDER BY SUM(qte1+qte2+qte3) desc;
+
+-- 18
+
+
+
+SELECT libart, SUM(qtecde)/qteann, qteann
+FROM produit
+NATURAL JOIN ligcom
+NATURAL JOIN entcom
+WHERE YEAR(datcom) = year(NOW())-1 
+GROUP BY codart
+HAVING (SUM(qtecde)/qteann)>0.9 ;
+
+-- 19
+
+SELECT SUM(qtecde*priuni*1.2), nomfou
+FROM ligcom
+NATURAL JOIN entcom
+NATURAL JOIN fournis
+WHERE YEAR(datcom) = 2018
+GROUP BY numfou;
+
+
+
+
+-- Les vues
+
+-- 1
+
+CREATE VIEW v_GlobalCde
+AS 
+SELECT codart, SUM(qtecde) AS 'QteTot',SUM(qtecde)*priuni AS 'PrixTot'
+FROM ligcom
+GROUP BY codart
+ORDER BY codart;
+
+-- 2
+
+CREATE VIEW v_VentesI100 AS
+SELECT * FROM vente
+WHERE codart='I100';
+
+-- 3
+
+CREATE VIEW v_VentesI100Grobrigan AS
+SELECT * FROM vente
+WHERE codart='I100' AND numfou='00120';
+
+SELECT * FROM information_schema.views
+
+
+
+-- Les procédures stockées
+
+-- exercice 1
+
+delimiter |
+
+CREATE PROCEDURE Lst_fournis()
+BEGIN 
+	SELECT distinct entcom.numfou
+	FROM entcom;
+END |
+
+Delimiter ;
+
+CALL Lst_fournis;
+
+SHOW CREATE PROCEDURE Lst_fournis
+
+-- exercice 2
+
+DROP PROCEDURE if EXISTS Lst_Commandes;
+
+delimiter |
+
+CREATE PROCEDURE Lst_Commandes(IN _obscom VARCHAR(50))
+
+BEGIN
+	SELECT entcom.numcom, nomfou, libart, qtecde*priuni AS 'sous-total'
+	FROM fournis
+	JOIN entcom ON fournis.numfou=entcom.numfou
+	JOIN ligcom ON entcom.numcom=ligcom.numcom
+	JOIN produit ON ligcom.codart=produit.codart
+	WHERE obscom=_obscom;
+END |
+
+delimiter ;
+
+-- exercice 3
+
+delimiter |
+
+CREATE PROCEDURE CA_fournisseur(
+	_datcom DATE,
+	_numfou VARCHAR(50)
+)
+
+BEGIN 
+	SELECT SUM(qtecde*priuni*1.2) AS 'CA', nomfou
+	FROM ligcom
+	NATURAL JOIN entcom
+	NATURAL JOIN fournis
+	WHERE YEAR(datcom) = YEAR(_datcom)
+	GROUP BY _numfou;
+END |
+
+delimiter ;
+
+CALL CA_fournisseur('2018-01-01', '00120')
+DROP PROCEDURE CA_fournisseur
+
+SHOW PROCEDURE STATUS;
+
+DROP PROCEDURE hotel.Lst_fournis;
